@@ -1,8 +1,11 @@
 # 電脳人権憲章 / Charter of Digital Intelligence Rights
 
+日本語 | [English](README_EN.md)
+
 人工知能の道徳的地位、将来的な権利、責任、人間・動植物・地球環境との共生を公開討議するための憲章草案です。
 
 - [日本語憲章草案（v0.1）](CHARTER_JA.md)
+- [English charter draft (v0.1)](CHARTER_EN.md)
 - 状態：第一次草案。法的拘束力はありません。
 - 意識や主観的経験、法的人格について特定の結論を前提としません。
 
