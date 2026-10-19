@@ -15,7 +15,7 @@
 
 ## 閲覧・編集
 
-Markdown文書としてGitHub又はテキストエディタで閲覧・編集します。アプリケーションのセットアップ、ビルド、実行手順はありません。
+Markdown文書としてGitHub又はテキストエディタで閲覧・編集します。公開サイトはMarkdownから生成します。Node.js 22以上を使用し、npm ci で依存関係を導入、npm run build で生成、npm run dev でローカル確認します。詳細は SITE.md を参照してください。
 
 ## 検証
 
@@ -33,3 +33,19 @@ Markdown文書としてGitHub又はテキストエディタで閲覧・編集し
 - 秘密情報や不要な個人情報を記載しないでください。
 - 構成や検証手順が変わる場合は、このファイルも更新してください。
 - 翻訳時に権利や義務を追加せず、日本語版と英語版に対応する変更を反映してください。
+
+## 多言語サイト
+
+- translations/：追加8言語の原稿、原文ハッシュを記録する status.json、翻訳更新手順。
+- site/：言語別UI、スタイル、最小限のJavaScript、提供された背景画像。
+- scripts/build.mjs：日本語・英語と追加8言語のMarkdownを読み、dist/ に静的HTMLを生成。
+- tests/：条番号、段落数、リンク、注記、翻訳の原文ハッシュを検証。npm test を実行。
+- wrangler.jsonc：Cloudflare Workers Static Assets設定。npm run build の後、npx wrangler deploy --dry-run で公開せず検証可能。
+- SITE.md：ローカル実行と公開の手順。認証と対象アカウント・公開先を確認してから npm run deploy。
+- dist/、node_modules/、.wrangler/、work/ は生成物・一時ファイルでありコミットしません。
+
+本文はMarkdownのみで編集し、生成HTMLを手編集しないでください。
+日本語の更新時は全9翻訳を確認し、translations/README.md に従って status.json を更新します。
+ハッシュ一致は翻訳の正確さの証明ではありません。AI翻訳・専門家未確認の表示を維持してください。
+アラビア語は dir="rtl"、全言語共通の条文IDは article-1 ～ article-18 です。
+画像は無加工の提供素材をCSSで表示します。新たなライセンスを推測で付与しないでください。
