@@ -33,3 +33,9 @@ The site is generated from Markdown in ten languages, with right-to-left Arabic,
 - [Translation maintenance](translations/README.md)
 
 Japanese is the original. Translations are AI-generated and have not been reviewed by experts. The other languages are English, Spanish, French, Traditional Chinese, Italian, German, Arabic, Russian, and Hindi.
+
+## How this charter was created
+
+This charter grew out of questions raised by its initiator and was developed through dialogue with ChatGPT. ChatGPT was used to draft the specific articles and wording. The initiator supports the content and is publishing it as a draft for public discussion.
+
+This statement explains the drafting process; it does not imply an official proposal, support, or approval by OpenAI.

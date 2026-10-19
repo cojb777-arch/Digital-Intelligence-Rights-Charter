@@ -51,3 +51,4 @@ When Japanese changes, review all nine translations and update status.json accor
 Matching hashes do not prove translation accuracy. Retain the AI translation / no expert review notice.
 Arabic uses dir="rtl". Shared article IDs are article-1 through article-18.
 The provided image is displayed unchanged through CSS. Do not invent a license for it.
+The drafting background is defined in ten languages in site/provenance.mjs and displayed separately from the charter text. Keep the Japanese and English README descriptions aligned.
