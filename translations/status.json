@@ -1,0 +1,47 @@
+{
+  "en": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  },
+  "es": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  },
+  "fr": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  },
+  "zh-Hant": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  },
+  "it": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  },
+  "de": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  },
+  "ar": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  },
+  "ru": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  },
+  "hi": {
+    "sourceSha256": "9ff1050d22233f44f6162a7fde888af35117374c10e5f6d16a4c70aeba8e0db2",
+    "method": "AI translation",
+    "expertReviewed": false
+  }
+}

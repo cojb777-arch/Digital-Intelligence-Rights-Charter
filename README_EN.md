@@ -24,3 +24,12 @@ The proposed process is to receive suggestions through GitHub Issues or Pull Req
 ## Repository Guidelines
 
 See [AGENTS_EN.md](AGENTS_EN.md) for the English translation of the repository's [working guidelines](AGENTS.md).
+
+## Multilingual Site
+
+The site is generated from Markdown in ten languages, with right-to-left Arabic, a table of contents, direct article links, and a print layout.
+
+- [Development and Cloudflare Workers deployment](SITE.md)
+- [Translation maintenance](translations/README.md)
+
+Japanese is the original. Translations are AI-generated and have not been reviewed by experts. The other languages are English, Spanish, French, Traditional Chinese, Italian, German, Arabic, Russian, and Hindi.

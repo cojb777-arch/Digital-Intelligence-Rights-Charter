@@ -17,7 +17,7 @@ This documentation repository publishes the Japanese draft of the Charter of Dig
 
 ## Reading and Editing
 
-Read and edit the Markdown documents on GitHub or in a text editor. There are no application setup, build, or execution procedures.
+Read and edit Markdown on GitHub or in a text editor. The public site is generated from Markdown. Use Node.js 22 or later, npm ci to install dependencies, npm run build to generate the site, and npm run dev for local preview. See SITE.md for details.
 
 ## Verification
 
@@ -35,3 +35,19 @@ Read and edit the Markdown documents on GitHub or in a text editor. There are no
 - Do not include secrets or unnecessary personal information.
 - Update these guidelines when the structure or verification procedures change.
 - Do not introduce new rights or obligations through translation, and reflect corresponding changes in the Japanese and English versions.
+
+## Multilingual Site
+
+- translations/: Eight additional Markdown translations, source hashes in status.json, and translation update instructions.
+- site/: Localized UI, styles, minimal JavaScript, and the user-provided background image.
+- scripts/build.mjs: Generates static HTML in dist/ from Japanese, English, and eight additional languages.
+- tests/: Checks article numbering, paragraph counts, links, notes, and source hashes. Run npm test.
+- wrangler.jsonc: Cloudflare Workers Static Assets configuration. After npm run build, run npx wrangler deploy --dry-run without publishing.
+- SITE.md: Local and deployment instructions. Confirm authentication, account, and destination before npm run deploy.
+- dist/, node_modules/, .wrangler/, and work/ are generated or temporary and are not committed.
+
+Edit charter text only in Markdown, never in generated HTML.
+When Japanese changes, review all nine translations and update status.json according to translations/README.md.
+Matching hashes do not prove translation accuracy. Retain the AI translation / no expert review notice.
+Arabic uses dir="rtl". Shared article IDs are article-1 through article-18.
+The provided image is displayed unchanged through CSS. Do not invent a license for it.
