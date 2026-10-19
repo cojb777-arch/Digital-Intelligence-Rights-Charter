@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { Marked } from 'marked';
 import { languages, repository } from '../site/languages.mjs';
+import { provenance } from '../site/provenance.mjs';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
 export const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -49,6 +50,8 @@ export function render(text, lang) {
   toc.push({id:'note',text:lang.note,depth:2});
   const alternatives = languages.map(l => '<link rel="alternate" hreflang="'+l.code+'" href="/'+l.code+'/">').join('');
   const nav = languages.map(l => '<a data-language href="/'+l.code+'/" lang="'+l.code+'" dir="'+(l.dir||'ltr')+'"'+(l.code===lang.code?' aria-current="page"':'')+'>'+esc(l.name)+'</a>').join('');
+  const background = provenance[lang.code];
+  toc.push({id:'creation-background',text:background.title,depth:2});
   const list = toc.map(t => '<li class="toc-level-'+t.depth+'"><a href="#'+t.id+'">'+esc(t.text)+'</a></li>').join('');
   return '<!doctype html>\n<html lang="'+lang.code+'" dir="'+(lang.dir||'ltr')+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'+
     '<title>'+esc(title)+'</title><meta name="description" content="'+esc(lang.draft+' — '+lang.footer)+'">'+
@@ -58,7 +61,8 @@ export function render(text, lang) {
     '<div class="edition"><span>v0.1</span><span>'+esc(lang.draft)+'</span><time datetime="2026-10-19">2026 · 10 · 19</time></div>'+
     '<aside class="translation-banner"><p>'+esc(lang.notice)+'</p></aside><div class="layout"><aside class="contents"><details open><summary>'+esc(lang.toc)+'</summary><nav aria-label="'+esc(lang.toc)+'"><ol>'+list+'</ol></nav></details></aside>'+
     '<main id="charter" tabindex="-1"><div class="scroll"><article>'+article+'</article></div>'+
-    '<section class="translation-note" aria-label="'+esc(lang.note)+'"><p>'+esc(lang.notice)+'</p><a href="/ja/" lang="ja">日本語原文</a><span aria-hidden="true"> · </span><a href="'+repository+'/blob/main/'+lang.file+'">'+esc(lang.source)+' ↗</a></section></main></div>'+
+    '<section class="translation-note" aria-label="'+esc(lang.note)+'"><p>'+esc(lang.notice)+'</p><a href="/ja/" lang="ja">日本語原文</a><span aria-hidden="true"> · </span><a href="'+repository+'/blob/main/'+lang.file+'">'+esc(lang.source)+' ↗</a></section>'+
+    '<section class="translation-note creation-background" id="creation-background" aria-labelledby="creation-title"><h2 id="creation-title">'+esc(background.title)+'</h2>'+background.paragraphs.map(p=>'<p>'+esc(p)+'</p>').join('')+'</section></main></div>'+
     '<footer><p>'+esc(lang.footer)+'</p><a href="#top">'+esc(lang.top)+' ↑</a></footer></body></html>';
 }
 
