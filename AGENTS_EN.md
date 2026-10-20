@@ -52,3 +52,5 @@ Matching hashes do not prove translation accuracy. Retain the AI translation / n
 Arabic uses dir="rtl". Shared article IDs are article-1 through article-18.
 The provided image is displayed unchanged through CSS. Do not invent a license for it.
 The drafting background is defined in ten languages in site/provenance.mjs and displayed separately from the charter text. Keep the Japanese and English README descriptions aligned.
+
+The QR destination URL and ten-language labels are maintained in site/sharing.mjs. scripts/qr.mjs generates the QR image during builds; tests/qr.test.mjs decodes it to verify the destination. The favicon is site/assets/favicon.svg.

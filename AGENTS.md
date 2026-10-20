@@ -50,3 +50,5 @@ Markdown文書としてGitHub又はテキストエディタで閲覧・編集し
 アラビア語は dir="rtl"、全言語共通の条文IDは article-1 ～ article-18 です。
 画像は無加工の提供素材をCSSで表示します。新たなライセンスを推測で付与しないでください。
 作成の経緯は site/provenance.mjs に10言語で定義し、憲章本文とは別のセクションに表示します。READMEの日英記載も対応させてください。
+
+QRコードの公開先URLと10言語のラベルは site/sharing.mjs で管理します。scripts/qr.mjs がビルド時にQR画像を生成し、tests/qr.test.mjs で実際に復号してURLを検証します。ファビコンは site/assets/favicon.svg です。

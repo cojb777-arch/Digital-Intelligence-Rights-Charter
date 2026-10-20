@@ -5,6 +5,8 @@ import { resolve } from 'node:path';
 import { Marked } from 'marked';
 import { languages, repository } from '../site/languages.mjs';
 import { provenance } from '../site/provenance.mjs';
+import { publicUrl, sharingLabels } from '../site/sharing.mjs';
+import { createQr } from './qr.mjs';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
 export const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -50,12 +52,13 @@ export function render(text, lang) {
   toc.push({id:'note',text:lang.note,depth:2});
   const alternatives = languages.map(l => '<link rel="alternate" hreflang="'+l.code+'" href="/'+l.code+'/">').join('');
   const nav = languages.map(l => '<a data-language href="/'+l.code+'/" lang="'+l.code+'" dir="'+(l.dir||'ltr')+'"'+(l.code===lang.code?' aria-current="page"':'')+'>'+esc(l.name)+'</a>').join('');
+  const share = sharingLabels[lang.code];
   const background = provenance[lang.code];
   toc.push({id:'creation-background',text:background.title,depth:2});
   const list = toc.map(t => '<li class="toc-level-'+t.depth+'"><a href="#'+t.id+'">'+esc(t.text)+'</a></li>').join('');
   return '<!doctype html>\n<html lang="'+lang.code+'" dir="'+(lang.dir||'ltr')+'"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'+
     '<title>'+esc(title)+'</title><meta name="description" content="'+esc(lang.draft+' — '+lang.footer)+'">'+
-    '<meta name="theme-color" content="#faf7f0">'+alternatives+'<link rel="alternate" hreflang="x-default" href="/ja/"><link rel="stylesheet" href="/style.css"><script src="/site.js" defer></script></head>'+
+    '<meta name="theme-color" content="#faf7f0">'+alternatives+'<link rel="alternate" hreflang="x-default" href="/ja/"><link rel="icon" type="image/svg+xml" sizes="any" href="/assets/favicon.svg"><link rel="stylesheet" href="/style.css"><script src="/site.js" defer></script></head>'+
     '<body id="top"><a class="skip-link" href="#charter">'+esc(lang.skip)+'</a><header class="masthead"><a class="wordmark" href="/'+lang.code+'/"><span class="seal" aria-hidden="true">✦</span><span>DIGITAL INTELLIGENCE<br><b>RIGHTS CHARTER</b></span></a><a class="github" href="'+repository+'">GitHub ↗</a></header>'+
     '<nav class="languages" aria-label="'+esc(lang.label)+'">'+nav+'</nav>'+
     '<div class="edition"><span>v0.1</span><span>'+esc(lang.draft)+'</span><time datetime="2026-10-19">2026 · 10 · 19</time></div>'+
@@ -63,7 +66,9 @@ export function render(text, lang) {
     '<main id="charter" tabindex="-1"><div class="scroll"><article>'+article+'</article></div>'+
     '<section class="translation-note" aria-label="'+esc(lang.note)+'"><p>'+esc(lang.notice)+'</p><a href="/ja/" lang="ja">日本語原文</a><span aria-hidden="true"> · </span><a href="'+repository+'/blob/main/'+lang.file+'">'+esc(lang.source)+' ↗</a></section>'+
     '<section class="translation-note creation-background" id="creation-background" aria-labelledby="creation-title"><h2 id="creation-title">'+esc(background.title)+'</h2>'+background.paragraphs.map(p=>'<p>'+esc(p)+'</p>').join('')+'</section></main></div>'+
-    '<footer><p>'+esc(lang.footer)+'</p><a href="#top">'+esc(lang.top)+' ↑</a></footer></body></html>';
+    '<footer><p>'+esc(lang.footer)+'</p><a href="#top">'+esc(lang.top)+' ↑</a></footer>'+
+    '<section class="site-sharing" aria-label="'+esc(share.title)+'"><a class="qr-trigger" href="/assets/site-qr.png" aria-label="'+esc(share.title+' — '+share.expand)+'"><img src="/assets/site-qr.png" alt="'+esc(share.title)+'" width="80" height="80"><span>'+esc(share.expand)+'</span></a></section>'+
+    '<dialog class="qr-dialog" aria-labelledby="qr-title"><form method="dialog"><button class="qr-close" autofocus>'+esc(share.close)+' ×</button></form><h2 id="qr-title">'+esc(share.title)+'</h2><img src="/assets/site-qr.png" alt="'+esc(share.title)+'" width="360" height="360"><a class="qr-url" href="'+publicUrl+'" dir="ltr">'+publicUrl+'</a></dialog></body></html>';
 }
 
 export async function build() {
@@ -86,6 +91,7 @@ export async function build() {
   }
   await writeFile(resolve(dist,'index.html'),render(texts.get('ja'),languages[0]));
   await cp(resolve(root,'site/assets'),resolve(dist,'assets'),{recursive:true});
+  await writeFile(resolve(dist,'assets/site-qr.png'),await createQr());
   for(const name of ['style.css','site.js','_headers','404.html']) await cp(resolve(root,'site',name),resolve(dist,name));
   console.log('Built 10 complete charter languages in dist/.');
 }

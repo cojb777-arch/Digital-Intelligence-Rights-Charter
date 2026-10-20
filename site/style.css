@@ -15,3 +15,16 @@ h1{font-size:clamp(27px,4.4cqw,48px);line-height:1.45;font-weight:500;text-align
 .translation-banner{max-width:950px;margin:18px auto 0;padding:0 28px;color:var(--muted);font:12px/1.8 system-ui,sans-serif}.translation-banner p{font:inherit;margin:0}
 .creation-background h2{font:600 18px/1.7 system-ui,sans-serif;margin:0 0 14px;padding:0;border:0}
 @media print{.creation-background{display:block;border:0;padding:0;margin-top:30px;break-inside:avoid}}
+
+.site-sharing{text-align:center;background:var(--paper);padding:8px 20px 28px;font:12px/1.6 system-ui,sans-serif}
+.qr-trigger{display:inline-flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none}
+.qr-trigger img{display:block;width:80px;height:80px;image-rendering:pixelated}
+.qr-dialog{width:min(440px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:20px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+.qr-dialog::backdrop{background:rgba(25,15,8,.7)}
+.qr-dialog form{text-align:end}.qr-close{font:14px/1.5 system-ui,sans-serif;border:1px solid var(--line);border-radius:4px;background:white;color:var(--ink);padding:8px 12px;cursor:pointer}
+.qr-close:focus-visible{outline:3px solid #985529;outline-offset:3px}
+.qr-dialog h2{font:600 18px/1.6 system-ui,sans-serif;margin:18px 0 8px;padding:0;border:0;text-align:center}
+.qr-dialog img{display:block;width:100%;height:auto;image-rendering:pixelated}
+.qr-url{display:block;text-align:center;overflow-wrap:anywhere;font:12px/1.6 system-ui,sans-serif;margin-top:12px}
+body:has(.qr-dialog[open]){overflow:hidden}
+@media print{.site-sharing,.qr-dialog{display:none}}
