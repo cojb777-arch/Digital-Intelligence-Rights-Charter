@@ -33,6 +33,7 @@ for(const lang of languages) {
     for(let n=1;n<=18;n++) assert.ok(ids.includes('article-'+n));
     for(const other of languages) assert.ok(html.includes('href="/'+other.code+'/"'));
     assert.ok(html.includes('href="/forum/?lang='+encodeURIComponent(lang.code)+'"'));
+    assert.equal((html.match(/data-forum-link/g)||[]).length,2);
     assert.ok(html.includes(lang.notice));
     assert.ok(html.includes('id="note"'));
     // Every plain paragraph is retained, including safeguards and closing text.

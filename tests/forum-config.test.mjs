@@ -13,6 +13,8 @@ test('forum CSP permits Turnstile without weakening charter pages',async()=>{
     const policy=blocks['/'+code+'/*']['Content-Security-Policy'];
     assert.match(policy,/script-src 'self'/);
     assert.ok(!policy.includes('challenges.cloudflare.com'));
+    assert.match(policy,/frame-ancestors 'self'/);
   }
   assert.match(blocks['/forum/*']['Content-Security-Policy'],/script-src 'self' https:\/\/challenges.cloudflare.com/);
+  assert.match(blocks['/forum/*']['Content-Security-Policy'],/frame-src 'self' https:\/\/challenges.cloudflare.com/);
 });

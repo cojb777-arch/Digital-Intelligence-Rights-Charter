@@ -25,7 +25,7 @@ npm run dev
 /ja/、/en/、/es/、/fr/、/zh-Hant/、/it/、/de/、/ar/、/ru/、/hi/ が各言語です。
 / は日本語本文です。#article-1 ～ #article-18 は全言語共通です。
 JavaScriptなしでも本文・目次・言語リンクが使えます。JavaScriptは言語切り替え時の条文位置の保持と小画面での目次折りたたみにのみ使用します。
-掲示板は `/forum/` です。閲覧はローカルD1だけで動作します。投稿・通報を試すには、Cloudflare公式の[Turnstileテストキー](https://developers.cloudflare.com/turnstile/troubleshooting/testing/)と長さ32字以上のローカル用 `FORUM_HASH_SECRET` を `.dev.vars` に設定します。管理画面 `/forum/?admin=1` には別の `FORUM_ADMIN_TOKEN` が必要です。`.dev.vars` はGitに含めません。
+掲示板は `/forum/` です。広い画面では憲章を左、掲示板を右に置き、それぞれスクロールできます。憲章ページ上部の掲示板リンクを使うと、開いていた条文へ左欄を合わせます。狭い画面では上下に並べます。閲覧はローカルD1だけで動作します。投稿・通報を試すには、Cloudflare公式の[Turnstileテストキー](https://developers.cloudflare.com/turnstile/troubleshooting/testing/)と長さ32字以上のローカル用 `FORUM_HASH_SECRET` を `.dev.vars` に設定します。管理画面 `/forum/?admin=1` には別の `FORUM_ADMIN_TOKEN` が必要です。`.dev.vars` はGitに含めません。
 
 ```text
 TURNSTILE_SITE_KEY=1x00000000000000000000AA
