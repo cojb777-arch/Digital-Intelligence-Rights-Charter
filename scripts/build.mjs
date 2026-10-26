@@ -13,6 +13,7 @@ export const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':
 export const hash = s => createHash('sha256').update(s.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n')).digest('hex');
 const markdown = new Marked();
 const sectionIds = ['preamble','chapter-1','chapter-2','chapter-3','chapter-4','chapter-5','closing'];
+const forumLabels = {ja:'共生掲示板',en:'Coexistence forum',es:'Foro de convivencia',fr:'Forum de coexistence','zh-Hant':'共生討論區',it:'Forum di coesistenza',de:'Forum zum Zusammenleben',ar:'منتدى التعايش',ru:'Форум сосуществования',hi:'सह-अस्तित्व मंच'};
 
 export function validate(text, code) {
   const tokens = markdown.lexer(text.replace(/^\uFEFF/, ''));
@@ -66,7 +67,7 @@ export function render(text, lang) {
     '<main id="charter" tabindex="-1"><div class="scroll"><article>'+article+'</article></div>'+
     '<section class="translation-note" aria-label="'+esc(lang.note)+'"><p>'+esc(lang.notice)+'</p><a href="/ja/" lang="ja">日本語原文</a><span aria-hidden="true"> · </span><a href="'+repository+'/blob/main/'+lang.file+'">'+esc(lang.source)+' ↗</a></section>'+
     '<section class="translation-note creation-background" id="creation-background" aria-labelledby="creation-title"><h2 id="creation-title">'+esc(background.title)+'</h2>'+background.paragraphs.map(p=>'<p>'+esc(p)+'</p>').join('')+'</section></main></div>'+
-    '<footer><p>'+esc(lang.footer)+'</p><a href="#top">'+esc(lang.top)+' ↑</a></footer>'+
+    '<footer><p>'+esc(lang.footer)+'</p><a href="/forum/?lang='+encodeURIComponent(lang.code)+'">'+esc(forumLabels[lang.code])+'</a><a href="#top">'+esc(lang.top)+' ↑</a></footer>'+
     '<section class="site-sharing" aria-label="'+esc(share.title)+'"><a class="qr-trigger" href="/assets/site-qr.png" aria-label="'+esc(share.title+' — '+share.expand)+'"><img src="/assets/site-qr.png" alt="'+esc(share.title)+'" width="80" height="80"><span>'+esc(share.expand)+'</span></a></section>'+
     '<dialog class="qr-dialog" aria-labelledby="qr-title"><form method="dialog"><button class="qr-close" autofocus>'+esc(share.close)+' ×</button></form><h2 id="qr-title">'+esc(share.title)+'</h2><img src="/assets/site-qr.png" alt="'+esc(share.title)+'" width="360" height="360"><a class="qr-url" href="'+publicUrl+'" dir="ltr">'+publicUrl+'</a></dialog></body></html>';
 }
@@ -91,6 +92,11 @@ export async function build() {
   }
   await writeFile(resolve(dist,'index.html'),render(texts.get('ja'),languages[0]));
   await cp(resolve(root,'site/assets'),resolve(dist,'assets'),{recursive:true});
+  await mkdir(resolve(dist,'forum'),{recursive:true});
+  await cp(resolve(root,'forum/index.html'),resolve(dist,'forum/index.html'));
+  await cp(resolve(root,'forum/forum.css'),resolve(dist,'forum/forum.css'));
+  await cp(resolve(root,'forum/forum.js'),resolve(dist,'forum/forum.js'));
+  await cp(resolve(root,'CHARTER_JA.md'),resolve(dist,'forum/charter-ja.md'));
   await writeFile(resolve(dist,'assets/site-qr.png'),await createQr());
   for(const name of ['style.css','site.js','_headers','404.html']) await cp(resolve(root,'site',name),resolve(dist,name));
   console.log('Built 10 complete charter languages in dist/.');

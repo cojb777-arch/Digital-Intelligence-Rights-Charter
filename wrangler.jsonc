@@ -2,8 +2,17 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "digital-intelligence-rights-charter",
   "compatibility_date": "2026-10-19",
+  "main": "./forum/worker/index.mjs",
+  "d1_databases": [{
+    "binding": "FORUM_DB",
+    "database_name": "digital-intelligence-rights-forum",
+    "database_id": "00000000-0000-0000-0000-000000000000",
+    "migrations_dir": "forum/migrations"
+  }],
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/forum/*"],
     "html_handling": "force-trailing-slash",
     "not_found_handling": "404-page"
   }
