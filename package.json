@@ -12,6 +12,7 @@
     "node": ">=22"
   },
   "dependencies": {
+    "jose": "^6.2.15",
     "marked": "^18.1.1"
   },
   "devDependencies": {

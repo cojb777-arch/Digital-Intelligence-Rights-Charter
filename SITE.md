@@ -25,18 +25,25 @@ npm run dev
 /ja/、/en/、/es/、/fr/、/zh-Hant/、/it/、/de/、/ar/、/ru/、/hi/ が各言語です。
 / は日本語本文です。#article-1 ～ #article-18 は全言語共通です。
 JavaScriptなしでも本文・目次・言語リンクが使えます。JavaScriptは言語切り替え時の条文位置の保持と小画面での目次折りたたみにのみ使用します。
-掲示板は `/forum/` です。広い画面では憲章を左、掲示板を右に置き、それぞれスクロールできます。憲章ページ上部の掲示板リンクを使うと、開いていた条文へ左欄を合わせます。狭い画面では上下に並べます。閲覧はローカルD1だけで動作します。投稿・通報を試すには、Cloudflare公式の[Turnstileテストキー](https://developers.cloudflare.com/turnstile/troubleshooting/testing/)と長さ32字以上のローカル用 `FORUM_HASH_SECRET` を `.dev.vars` に設定します。管理画面 `/forum/?admin=1` には別の `FORUM_ADMIN_TOKEN` が必要です。`.dev.vars` はGitに含めません。
+掲示板は `/forum/` です。広い画面では憲章を左、掲示板を右に置き、それぞれスクロールできます。憲章ページ上部の掲示板リンクを使うと、開いていた条文へ左欄を合わせます。狭い画面では上下に並べます。閲覧はローカルD1だけで動作します。投稿・通報を試すには、Cloudflare公式の[Turnstileテストキー](https://developers.cloudflare.com/turnstile/troubleshooting/testing/)と長さ32字以上のローカル用 `FORUM_HASH_SECRET` を `.dev.vars` に設定します。管理画面は `/forum/admin/` に分離し、AccessのJWT検証が未設定なら403を返します。`.dev.vars` はGitに含めません。
 
 ```text
 TURNSTILE_SITE_KEY=1x00000000000000000000AA
 TURNSTILE_SECRET=1x0000000000000000000000000000000AA
 FORUM_HASH_SECRET=ローカル専用で32文字以上の値
-FORUM_ADMIN_TOKEN=ローカル専用で32文字以上の値
 ```
 
 このテストキーでの投稿はローカルの `localhost` / `127.0.0.1` のみ許可します。本番では必ず実キーを設定します。スレッドは1時間に同一接続元から3件、返信は10件、通報は5件までです。公開書き込みは設定不足なら拒否されます。
 
 AIレビューの試験にはプロバイダーごとに `OPENAI_API_KEY` + `OPENAI_MODEL`、`ANTHROPIC_API_KEY` + `ANTHROPIC_MODEL`、`GEMINI_API_KEY` + `GEMINI_MODEL` を設定します。さらに `AI_DAILY_BUDGET_USD`、`AI_MAX_COST_PER_RUN_USD`、`AI_DAILY_RUN_LIMIT` の正の値が必要です。これらのドル上限は実行予約の推定枠であり、実際の請求上限を保証しません。プロバイダー側でも予算上限を設定してください。各モデルへ同じ原文と質問を独立に送信し、回答は管理者が確認して公開するまで非公開です。APIキーがない場合は架空の回答を作成しません。
+
+掲示板の操作画面と初期5スレッドの題名は10言語に対応します。利用者の投稿は原文を保存し、投稿時の画面言語も記録します。本文の自動翻訳はCloudflare Workers AIの `@cf/meta/m2m100-1.2b` を使い、必要な言語だけ生成してD1に保存する実装です。現在は無効で、AI呼び出しは発生しません。有効化には `TRANSLATION_ENABLED=true` と `TRANSLATION_DAILY_LIMIT`（1～100）をWorkerに設定します。同一接続元は1時間10件までです。この上限は呼び出し回数の制限であり、Cloudflare全体の課金上限を保証しません。料金と残りの無料枠を確認してから有効化してください。機械翻訳は誤訳し得るため、翻訳表示には原文へ戻すボタンを付けています。
+
+### 管理画面のAccess保護
+
+管理画面 `/forum/admin/` と管理API `/api/forum/admin/` 以下は、Worker内でCloudflare AccessのJWT署名、発行元、アプリのAUD、有効期限、許可メールを検証します。設定値がない場合は拒否します。公開掲示板の `?admin=1` では管理画面を表示しません。管理画面への小さなリンクは巻物の左端にあります。URLの発見しにくさを認証の代わりにはしません。
+
+Cloudflare Zero Trustの **Access controls → Applications** でSelf-hostedのアプリを作成し、パブリックホスト名 `digital-intelligence-rights-charter.dreamion.workers.dev` のパス `forum/admin` と `api/forum/admin` を登録します。Worker全体を対象にしないでください。AllowポリシーのEmailsには運営者が指定した管理者本人のアドレスだけを登録します。アプリのAUDを取得し、`CF_ACCESS_TEAM_DOMAIN`（Team domainの先頭部分）、`CF_ACCESS_AUD`、`ADMIN_EMAIL` をWorker Secretsに設定します。`wrangler secret put` は即時デプロイするため、設定順序と本番の版を確認してください。`preview_urls=false` でVersion URLを無効化し、プレビューにも管理者Secretsを渡しません。公開後は未ログインで管理画面・APIがAccessに遮断され、ログイン後のみ使えることを確認します。
 
 ## Cloudflare Workersへの公開
 
@@ -47,7 +54,7 @@ AIレビューの試験にはプロバイダーごとに `OPENAI_API_KEY` + `OPE
 1. 対象Cloudflareアカウント、公開Worker、既存データへの影響を確認する。
 2. D1 `digital-intelligence-rights-forum` を作成し、返されたIDを `wrangler.jsonc` に設定する。
 3. `npx wrangler d1 migrations apply digital-intelligence-rights-forum --remote` で初期スキーマと5つのスレッドを投入する。既存DBなら先に[Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/)の復元点と内容を確認する。
-4. Turnstile実サイトキーと秘密鍵、管理者トークン、IPハッシュ用秘密鍵をWorker Secretsに設定する。`wrangler secret put` は即時デプロイも行うため、操作順序に注意する。
+4. Turnstile実サイトキーと秘密鍵、IPハッシュ用秘密鍵、管理画面用のAccess設定をWorker Secretsに設定する。`wrangler secret put` は即時デプロイも行うため、操作順序に注意する。
 5. AI試験版を使う場合だけモデル設定、APIキー、日次枠を設定する。未設定ならAI実行は無効のままにする。
 6. `npm test`、`npm run build`、`npx wrangler deploy --dry-run` を再実行し、公開の承認後にデプロイする。
 7. 公開後に憲章10言語、`/forum/`、閲覧、投稿、通報、管理権限を実環境で確認する。失敗時はWorkerの以前の版へ戻し、D1の復元が必要ならデータ損失範囲を確認してから操作する。
