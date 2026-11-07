@@ -18,9 +18,11 @@ h1{font-size:clamp(27px,4.4cqw,48px);line-height:1.45;font-weight:500;text-align
 .creation-background h2{font:600 18px/1.7 system-ui,sans-serif;margin:0 0 14px;padding:0;border:0}
 @media print{.creation-background{display:block;border:0;padding:0;margin-top:30px;break-inside:avoid}}
 
-.site-sharing{text-align:center;background:var(--paper);padding:8px 20px 28px;font:12px/1.6 system-ui,sans-serif}
-.qr-trigger{display:inline-flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none}
-.qr-trigger img{display:block;width:80px;height:80px;image-rendering:pixelated}
+.masthead-brand{display:flex;align-items:center;gap:14px;min-width:0}
+.masthead-brand .qr-trigger{display:grid;place-items:center;flex:none;width:44px;height:44px;padding:2px;border:1px solid var(--line);border-radius:3px;background:#fffefa}
+.masthead-brand .qr-trigger:hover{background:#f4ead9}
+.masthead-brand .qr-trigger img{display:block;width:40px;height:40px;image-rendering:pixelated}
+@media(max-width:540px){.charter-masthead{flex-wrap:wrap}.masthead-brand{gap:8px}.masthead-brand .qr-trigger{width:36px;height:36px}.masthead-brand .qr-trigger img{width:32px;height:32px}}
 .qr-dialog{width:min(440px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:20px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
 .qr-dialog::backdrop{background:rgba(25,15,8,.7)}
 .qr-dialog form{text-align:end}.qr-close{font:14px/1.5 system-ui,sans-serif;border:1px solid var(--line);border-radius:4px;background:white;color:var(--ink);padding:8px 12px;cursor:pointer}
@@ -29,8 +31,8 @@ h1{font-size:clamp(27px,4.4cqw,48px);line-height:1.45;font-weight:500;text-align
 .qr-dialog img{display:block;width:100%;height:auto;image-rendering:pixelated}
 .qr-url{display:block;text-align:center;overflow-wrap:anywhere;font:12px/1.6 system-ui,sans-serif;margin-top:12px}
 body:has(.qr-dialog[open]){overflow:hidden}
-@media print{.site-sharing,.qr-dialog{display:none}}
-.charter-embed .masthead,.charter-embed .languages,.charter-embed .edition,.charter-embed footer,.charter-embed .site-sharing,.charter-embed .qr-dialog{display:none}
+@media print{.qr-dialog{display:none}}
+.charter-embed .masthead,.charter-embed .languages,.charter-embed .edition,.charter-embed footer,.charter-embed .qr-dialog{display:none}
 .charter-embed .translation-banner{margin-top:10px}
 .charter-embed .layout{grid-template-columns:1fr;gap:0;padding:8px}
 .charter-embed .contents{position:static;max-height:none;padding:8px 14px}
