@@ -83,26 +83,3 @@ $('#post-form').addEventListener('submit',async e=>{e.preventDefault();try{const
 $('#report-form').addEventListener('submit',async e=>{e.preventDefault();try{await send('/posts/'+encodeURIComponent(reportPostId)+'/reports',formData(e.target),e.target);$('#report-dialog').close();status('OK');}catch(err){status(err.message);}});$('#report-cancel').addEventListener('click',()=>$('#report-dialog').close());
 translate();loadMeta().then(()=>threadId?showThread(pageNumber(params.get('page'))):listThreads()).catch(err=>status(err.message));
 function pageNumber(value){return Math.max(1,Math.min(10000,parseInt(value||'1',10)||1));}
-const forumQrLabels={
-  ja:['このサイトのQRコード','閉じる'],en:['QR code for this site','Close'],
-  es:['Código QR de este sitio','Cerrar'],fr:['Code QR de ce site','Fermer'],
-  'zh-Hant':['本網站的QR碼','關閉'],it:['Codice QR di questo sito','Chiudi'],
-  de:['QR-Code dieser Website','Schließen'],ar:['رمز QR لهذا الموقع','إغلاق'],
-  ru:['QR-код этого сайта','Закрыть'],hi:['इस साइट का QR कोड','बंद करें']
-};
-function translateQr(){
-  const [title,close]=forumQrLabels[language];
-  $('#forum-qr-trigger').setAttribute('aria-label',title);
-  $('#forum-qr-title').textContent=title;
-  $('#forum-qr-close').textContent=close+' ×';
-}
-const forumQrDialog=$('#forum-qr-dialog');
-$('#forum-qr-trigger').addEventListener('click',()=>forumQrDialog.showModal());
-forumQrDialog.addEventListener('click',event=>{
-  const bounds=forumQrDialog.getBoundingClientRect();
-  if(event.target===forumQrDialog &&
-    (event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)) forumQrDialog.close();
-});
-forumQrDialog.addEventListener('close',()=>$('#forum-qr-trigger').focus({preventScroll:true}));
-$('#forum-lang').addEventListener('change',translateQr);
-translateQr();
