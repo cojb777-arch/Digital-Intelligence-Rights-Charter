@@ -29,6 +29,8 @@ See [AGENTS_EN.md](AGENTS_EN.md) for the English translation of the repository's
 
 The site is generated from Markdown in ten languages, with right-to-left Arabic, a table of contents, direct article links, and a print layout.
 
+On the forum page (`/forum/`), the small “✦” at the far left edge of the charter pane links to the admin page. It opens `/forum/admin/` in a new tab and requires Cloudflare Access authentication.
+
 - [Development and Cloudflare Workers deployment](SITE.md)
 - [Translation maintenance](translations/README.md)
 
