@@ -6,7 +6,7 @@
   "d1_databases": [{
     "binding": "FORUM_DB",
     "database_name": "digital-intelligence-rights-forum",
-    "database_id": "00000000-0000-0000-0000-000000000000",
+    "database_id": "05ab9fa8-2461-47bc-ac3f-8bbc7c241080",
     "migrations_dir": "forum/migrations"
   }],
   "assets": {

@@ -42,7 +42,7 @@ AIレビューの試験にはプロバイダーごとに `OPENAI_API_KEY` + `OPE
 
 公式手順: https://developers.cloudflare.com/workers/static-assets/
 
-**本番D1作成・移行・Secrets設定・デプロイは、運営者の確認後に実施します。** 現在の `wrangler.jsonc` のD1 IDは意図的な仮値で、公開前に実IDへの置換が必要です。予定手順は次のとおりです。
+**本番D1、Turnstile、Secretsは運営者の承認を得て設定しました。** `wrangler.jsonc` には本番D1 IDを設定済みです。新たな環境へ公開する際の手順は次のとおりです。
 
 1. 対象Cloudflareアカウント、公開Worker、既存データへの影響を確認する。
 2. D1 `digital-intelligence-rights-forum` を作成し、返されたIDを `wrangler.jsonc` に設定する。
@@ -56,7 +56,7 @@ login はアカウント所有者がブラウザーで行います。トーク�
 公開前に whoami で対象アカウントを確認し、Worker名 digital-intelligence-rights-charter と公開先を確定してください。
 複数アカウントの場合は対象アカウントを明示して設定してください。
 実際の公開URLは deploy 成功時の出力を使用します。URLを推測して公開済みと扱わないでください。
-独自ドメインは未設定です。GitHub連携による自動デプロイの有無は本番側で未確認です。PRマージ前にも公開への影響を確認します。
+独自ドメインは未設定です。GitHub連携のWorkers Buildsによる自動ビルドを使用しています。PRマージ前にも公開への影響を確認します。
 
 ## 原稿と翻訳
 
