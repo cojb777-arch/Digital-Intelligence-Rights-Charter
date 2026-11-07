@@ -65,7 +65,7 @@ async function translateNode(type,id,node,sourceLanguage) {
     note.append(toggle);node.after(note);
   } catch { /* Keep the original when translation is unavailable. */ }
 }
-function translate(){document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';document.title=t(0)+' | Digital Intelligence Rights Charter';$('#forum-lang').value=language;$('#forum-title').textContent=t(0);$('#forum-intro').textContent=t(1);$('#forum-guidelines').textContent=guidelines[language];const reading=readingLabels[language],charterUrl='/'+language+'/';$('#charter-link').href=charterUrl;$('#charter-link').textContent=reading[1];$('#charter-open').href=charterUrl;$('#charter-open').textContent=reading[2];$('#charter-pane-title').textContent=reading[0];$('#charter-frame').title=reading[0];if(new URL($('#charter-frame').src).pathname!==charterUrl||initialSection){const hash=$('#charter-frame').contentWindow?.location.hash||'';$('#charter-frame').src=charterUrl+'?embed=1'+(initialSection||hash);initialSection='';}$('#list-return').textContent='← '+formLabels[language][1];$('.admin-scroll-edge').setAttribute('aria-label',formLabels[language][9]);$('.admin-scroll-edge').title=formLabels[language][9];$('footer a:first-child').href=charterUrl;$('footer a:first-child').textContent=reading[0];$('#search-form label[for=search]').textContent=t(2);$('#search-form label[for=category]').textContent=t(3);$('#category option:first-child').textContent=t(4);$('#search-form button').textContent=t(5);$('#new-thread-toggle').textContent=t(6);$('#new-thread h2').textContent=t(6);$('#thread-view h3').textContent=t(7);$('#post-form button[type=submit]').textContent=t(7);$('#thread-form button[type=submit]').textContent=t(10);const f=formLabels[language];[...$('#thread-form').querySelectorAll('label')].forEach((x,i)=>x.firstChild.textContent=f[[2,3,4,5][i]]);[...$('#post-form').querySelectorAll('label')].forEach((x,i)=>x.firstChild.textContent=f[[4,5][i]]);$('#report-form label').firstChild.textContent=f[6];$('#report-cancel').textContent=f[7];$('#report-form button[type=submit]').textContent=f[8];$('#report-dialog h2').textContent=f[10];}
+function translate(){document.documentElement.lang=language;document.documentElement.dir=language==='ar'?'rtl':'ltr';document.title=t(0)+' | Digital Intelligence Rights Charter';$('#forum-lang').value=language;$('#forum-title').textContent=t(0);$('#forum-intro').textContent=t(1);$('#forum-guidelines').textContent=guidelines[language];const reading=readingLabels[language],charterUrl='/'+language+'/';$('#charter-link').href=charterUrl;$('#charter-link').textContent=reading[1];$('#charter-open').href=charterUrl;$('#charter-open').textContent=reading[2];$('#charter-pane-title').textContent=reading[0];$('#charter-frame').title=reading[0];if(new URL($('#charter-frame').src).pathname!==charterUrl||initialSection){const hash=$('#charter-frame').contentWindow?.location.hash||'';$('#charter-frame').src=charterUrl+'?embed=1'+(initialSection||hash);initialSection='';}$('#list-return').textContent='← '+formLabels[language][1];$('.admin-scroll-edge').setAttribute('aria-label',formLabels[language][9]);$('footer a:first-child').href=charterUrl;$('footer a:first-child').textContent=reading[0];$('#search-form label[for=search]').textContent=t(2);$('#search-form label[for=category]').textContent=t(3);$('#category option:first-child').textContent=t(4);$('#search-form button').textContent=t(5);$('#new-thread-toggle').textContent=t(6);$('#new-thread h2').textContent=t(6);$('#thread-view h3').textContent=t(7);$('#post-form button[type=submit]').textContent=t(7);$('#thread-form button[type=submit]').textContent=t(10);const f=formLabels[language];[...$('#thread-form').querySelectorAll('label')].forEach((x,i)=>x.firstChild.textContent=f[[2,3,4,5][i]]);[...$('#post-form').querySelectorAll('label')].forEach((x,i)=>x.firstChild.textContent=f[[4,5][i]]);$('#report-form label').firstChild.textContent=f[6];$('#report-cancel').textContent=f[7];$('#report-form button[type=submit]').textContent=f[8];$('#report-dialog h2').textContent=f[10];}
 function pageLinks(container,page,pages,callback){container.replaceChildren();for(const n of [page-1,page,page+1]){if(n<1||n>pages)continue;const a=el('a',String(n));a.href='#';if(n===page)a.setAttribute('aria-current','page');a.addEventListener('click',e=>{e.preventDefault();callback(n);});container.append(a);}}
 function categoryName(c){const index=['philosophy','rights','coexistence','charter'].indexOf(c.id);return index>=0?categoryLabels[language][index]:c.name_en;}
 function challenge(form){const slot=form.querySelector('.challenge');if(!meta.postingEnabled){form.querySelector('button[type=submit]').disabled=true;slot.textContent=t(12);return;}if(!window.turnstile){slot.textContent=t(11);return;}window.turnstile.render(slot,{sitekey:meta.siteKey});}
@@ -83,3 +83,26 @@ $('#post-form').addEventListener('submit',async e=>{e.preventDefault();try{const
 $('#report-form').addEventListener('submit',async e=>{e.preventDefault();try{await send('/posts/'+encodeURIComponent(reportPostId)+'/reports',formData(e.target),e.target);$('#report-dialog').close();status('OK');}catch(err){status(err.message);}});$('#report-cancel').addEventListener('click',()=>$('#report-dialog').close());
 translate();loadMeta().then(()=>threadId?showThread(pageNumber(params.get('page'))):listThreads()).catch(err=>status(err.message));
 function pageNumber(value){return Math.max(1,Math.min(10000,parseInt(value||'1',10)||1));}
+const forumQrLabels={
+  ja:['このサイトのQRコード','閉じる'],en:['QR code for this site','Close'],
+  es:['Código QR de este sitio','Cerrar'],fr:['Code QR de ce site','Fermer'],
+  'zh-Hant':['本網站的QR碼','關閉'],it:['Codice QR di questo sito','Chiudi'],
+  de:['QR-Code dieser Website','Schließen'],ar:['رمز QR لهذا الموقع','إغلاق'],
+  ru:['QR-код этого сайта','Закрыть'],hi:['इस साइट का QR कोड','बंद करें']
+};
+function translateQr(){
+  const [title,close]=forumQrLabels[language];
+  $('#forum-qr-trigger').setAttribute('aria-label',title);
+  $('#forum-qr-title').textContent=title;
+  $('#forum-qr-close').textContent=close+' ×';
+}
+const forumQrDialog=$('#forum-qr-dialog');
+$('#forum-qr-trigger').addEventListener('click',()=>forumQrDialog.showModal());
+forumQrDialog.addEventListener('click',event=>{
+  const bounds=forumQrDialog.getBoundingClientRect();
+  if(event.target===forumQrDialog &&
+    (event.clientX<bounds.left||event.clientX>bounds.right||event.clientY<bounds.top||event.clientY>bounds.bottom)) forumQrDialog.close();
+});
+forumQrDialog.addEventListener('close',()=>$('#forum-qr-trigger').focus({preventScroll:true}));
+$('#forum-lang').addEventListener('change',translateQr);
+translateQr();
