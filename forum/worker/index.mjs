@@ -1,10 +1,13 @@
 import {availableModels,askModel} from './ai.mjs';
+import {accessIdentity} from './access.mjs';
 const json = (data,status=200) => new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
 const fail = (message,status=400) => json({error:message},status);
 const now = () => new Date().toISOString();
 const id = () => crypto.randomUUID();
 const clean = (value,max) => typeof value === 'string' && value.trim().length > 0 && value.trim().length <= max ? value.trim() : null;
 const pageNumber = (value) => Math.max(1,Math.min(10000,Number.parseInt(value || '1',10) || 1));
+const languages=new Set(['ja','en','es','fr','zh-Hant','it','de','ar','ru','hi']);
+const postLanguage=data=>languages.has(data.language)?data.language:'ja';
 const encoder = new TextEncoder();
 
 async function digest(secret,text) {
@@ -12,13 +15,7 @@ async function digest(secret,text) {
   return [...new Uint8Array(await crypto.subtle.sign('HMAC',key,encoder.encode(text)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 }
 async function admin(request,env) {
-  if(!env.FORUM_ADMIN_TOKEN || env.FORUM_ADMIN_TOKEN.length < 32) return false;
-  const supplied=request.headers.get('authorization')?.replace(/^Bearer /,'') || '';
-  if(supplied.length<32 || supplied.length>256) return false;
-  const actual=await digest(env.FORUM_ADMIN_TOKEN,supplied),expected=await digest(env.FORUM_ADMIN_TOKEN,env.FORUM_ADMIN_TOKEN);
-  let difference=0;
-  for(let i=0;i<actual.length;i++) difference|=actual.charCodeAt(i)^expected.charCodeAt(i);
-  return difference===0;
+  return !!await accessIdentity(request,env);
 }
 async function verifyTurnstile(token,request,env) {
   if(!env.TURNSTILE_SECRET || !env.TURNSTILE_SITE_KEY || !token) return false;
@@ -64,8 +61,8 @@ async function createThread(request,env) {
   const thread=id(),post=id(),person=id(),time=now();
   await env.FORUM_DB.batch([
     env.FORUM_DB.prepare('INSERT INTO participants VALUES (?,\'HUMAN\',?,NULL,NULL,?)').bind(person,handle,time),
-    env.FORUM_DB.prepare('INSERT INTO threads VALUES (?,?,?,?,?,1,\'visible\')').bind(thread,data.category,title,time,time),
-    env.FORUM_DB.prepare('INSERT INTO posts VALUES (?,?,1,?,\'HUMAN\',?,NULL,?,\'visible\',NULL)').bind(post,thread,person,body,time)
+    env.FORUM_DB.prepare('INSERT INTO threads(id,category_id,title,created_at,updated_at,post_count,status,language) VALUES (?,?,?,?,?,1,\'visible\',?)').bind(thread,data.category,title,time,time,postLanguage(data)),
+    env.FORUM_DB.prepare('INSERT INTO posts(id,thread_id,number,participant_id,kind,body,quote_post_id,created_at,status,ai_run_id,language) VALUES (?,?,1,?,\'HUMAN\',?,NULL,?,\'visible\',NULL,?)').bind(post,thread,person,body,time,postLanguage(data))
   ]);
   return json({id:thread,postId:post},201);
 }
@@ -81,7 +78,7 @@ async function createPost(request,env,threadId) {
   await env.FORUM_DB.batch([
     env.FORUM_DB.prepare('INSERT INTO participants VALUES (?,\'HUMAN\',?,NULL,NULL,?)').bind(person,handle,time),
     env.FORUM_DB.prepare('UPDATE threads SET post_count=post_count+1,updated_at=? WHERE id=?').bind(time,threadId),
-    env.FORUM_DB.prepare('INSERT INTO posts SELECT ?,id,post_count,?,\'HUMAN\',?,?,?,\'visible\',NULL FROM threads WHERE id=?').bind(post,person,body,data.quotePostId || null,time,threadId)
+    env.FORUM_DB.prepare('INSERT INTO posts(id,thread_id,number,participant_id,kind,body,quote_post_id,created_at,status,ai_run_id,language) SELECT ?,id,post_count,?,\'HUMAN\',?,?,?,\'visible\',NULL,? FROM threads WHERE id=?').bind(post,person,body,data.quotePostId || null,time,postLanguage(data),threadId)
   ]);
   const created=await env.FORUM_DB.prepare('SELECT number FROM posts WHERE id=?').bind(post).first();
   return json({id:post,number:created.number},201);
@@ -95,6 +92,34 @@ async function reportPost(request,env,postId) {
   if(await env.FORUM_DB.prepare('SELECT id FROM reports WHERE post_id=? AND reporter_hash=?').bind(postId,rate.actor).first()) return fail('already_reported',409);
   await env.FORUM_DB.prepare('INSERT INTO reports VALUES (?,?,?,?,?,\'open\')').bind(id(),postId,reason,rate.actor,now()).run();
   return json({ok:true},201);
+}
+async function translate(request,env) {
+  const dailyLimit=Number(env.TRANSLATION_DAILY_LIMIT);
+  if(env.TRANSLATION_ENABLED!=='true'||!env.AI||!Number.isSafeInteger(dailyLimit)||dailyLimit<1||dailyLimit>100) return fail('translation_disabled',503);
+  const data=await input(request);
+  if(!['thread','post'].includes(data.type)||!languages.has(data.language)||typeof data.id!=='string'||!/^[a-zA-Z0-9-]{1,80}$/.test(data.id)) return fail('invalid_translation_request');
+  const table=data.type==='thread'?'threads':'posts',column=data.type==='thread'?'title':'body';
+  const item=await env.FORUM_DB.prepare(`SELECT ${column} AS text,language FROM ${table} WHERE id=? AND status='visible'`).bind(data.id).first();
+  if(!item) return fail('not_found',404);
+  if(item.language===data.language) return json({text:item.text,sourceLanguage:item.language,translated:false});
+  const cached=await env.FORUM_DB.prepare('SELECT text FROM translations WHERE resource_type=? AND resource_id=? AND target_language=?').bind(data.type,data.id,data.language).first();
+  if(cached) return json({text:cached.text,sourceLanguage:item.language,translated:true});
+  const rate=await limit(request,env,'translation',10);if(rate.error)return fail(rate.error,429);
+  const started=now(),day=started.slice(0,10)+'T00:00:00.000Z',run=id();
+  const reserved=await env.FORUM_DB.prepare('INSERT INTO translation_runs SELECT ?,?,\'reserved\' WHERE (SELECT COUNT(*) FROM translation_runs WHERE created_at>=?)<?').bind(run,started,day,dailyLimit).run();
+  if(reserved.meta.changes!==1)return fail('translation_daily_limit',429);
+  try {
+    const source=item.language==='zh-Hant'?'zh':item.language,target=data.language==='zh-Hant'?'zh':data.language;
+    const result=await env.AI.run('@cf/meta/m2m100-1.2b',{text:item.text,source_lang:source,target_lang:target});
+    const translated=result?.translated_text;
+    if(typeof translated!=='string'||!translated.trim()||translated.length>20000)throw Error('invalid_translation_result');
+    await env.FORUM_DB.prepare('INSERT OR IGNORE INTO translations VALUES (?,?,?,?,?,?,?)').bind(data.type,data.id,data.language,item.language,translated.trim(),'@cf/meta/m2m100-1.2b',now()).run();
+    await env.FORUM_DB.prepare('UPDATE translation_runs SET status=\'completed\' WHERE id=?').bind(run).run();
+    return json({text:translated.trim(),sourceLanguage:item.language,translated:true});
+  } catch {
+    await env.FORUM_DB.prepare('UPDATE translation_runs SET status=\'failed\' WHERE id=?').bind(run).run();
+    return fail('translation_failed',502);
+  }
 }
 async function moderate(request,env,postId) {
   if(!await admin(request,env)) return fail('unauthorized',401);
@@ -163,7 +188,7 @@ async function publishAi(request,env,runId) {
   await env.FORUM_DB.batch([
     env.FORUM_DB.prepare('INSERT INTO participants VALUES (?,\'AI\',?,?,?,?)').bind(person,run.provider+' / '+run.model,run.provider,run.model,time),
     env.FORUM_DB.prepare('UPDATE threads SET post_count=post_count+1,updated_at=? WHERE id=?').bind(time,run.thread_id),
-    env.FORUM_DB.prepare('INSERT INTO posts SELECT ?,id,post_count,?,\'AI\',?,NULL,?,\'visible\',? FROM threads WHERE id=?').bind(post,person,run.response_text,time,runId,run.thread_id),
+    env.FORUM_DB.prepare('INSERT INTO posts(id,thread_id,number,participant_id,kind,body,quote_post_id,created_at,status,ai_run_id,language) SELECT ?,id,post_count,?,\'AI\',?,NULL,?,\'visible\',?,\'ja\' FROM threads WHERE id=?').bind(post,person,run.response_text,time,runId,run.thread_id),
     env.FORUM_DB.prepare('UPDATE ai_runs SET status=\'published\',published_at=? WHERE id=? AND status=\'pending\'').bind(time,runId),
     env.FORUM_DB.prepare('INSERT INTO moderation_logs VALUES (?,?,?,?,?,?,?)').bind(id(),'publish_ai','ai_run',runId,'reviewed by administrator','admin',time)
   ]);
@@ -172,9 +197,10 @@ async function publishAi(request,env,runId) {
 async function api(request,env) {
   if(!env.FORUM_DB) return fail('forum_database_not_configured',503);
   const url=new URL(request.url),path=url.pathname,method=request.method;
+  if(path.startsWith('/api/forum/admin/') && !await admin(request,env)) return fail('unauthorized',403);
   if(method==='GET' && path==='/api/forum/meta') {
     const categories=await env.FORUM_DB.prepare('SELECT * FROM categories ORDER BY sort_order').all();
-    return json({categories:categories.results,postingEnabled:!!(env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET && env.FORUM_HASH_SECRET),siteKey:env.TURNSTILE_SITE_KEY || null});
+    return json({categories:categories.results,postingEnabled:!!(env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET && env.FORUM_HASH_SECRET),siteKey:env.TURNSTILE_SITE_KEY || null,translationEnabled:env.TRANSLATION_ENABLED==='true'&&!!env.AI&&Number(env.TRANSLATION_DAILY_LIMIT)>0});
   }
   if(method==='GET' && path==='/api/forum/threads') {
     const page=pageNumber(url.searchParams.get('page')),q=clean(url.searchParams.get('q'),120),cat=url.searchParams.get('category');
@@ -206,6 +232,7 @@ async function api(request,env) {
   if(method!=='POST') return fail('not_found',404);
   if(!sameOrigin(request)) return fail('invalid_origin',403);
   if(path==='/api/forum/threads') return createThread(request,env);
+  if(path==='/api/forum/translations') return translate(request,env);
   if(path==='/api/forum/admin/ai') return startAiReview(request,env);
   const publishPath=path.match(/^\/api\/forum\/admin\/ai\/([a-zA-Z0-9-]+)\/publish$/);
   if(publishPath) return publishAi(request,env,publishPath[1]);
@@ -219,7 +246,15 @@ async function api(request,env) {
 }
 export default {async fetch(request,env) {
   try {
-    if(new URL(request.url).pathname.startsWith('/api/forum/')) return await api(request,env);
+    const path=new URL(request.url).pathname;
+    if(path.startsWith('/api/forum/')) return await api(request,env);
+    const decoded=new URL(decodeURIComponent(path),request.url).pathname.toLowerCase();
+    if(decoded==='/forum/admin' || decoded.startsWith('/forum/admin/')) {
+      if(!await admin(request,env)) return new Response('Forbidden',{status:403,headers:{'cache-control':'no-store'}});
+      const asset=await env.ASSETS.fetch(request);
+      const headers=new Headers(asset.headers);headers.set('cache-control','private, no-store');
+      return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
+    }
     return env.ASSETS.fetch(request);
   } catch(error) {
     console.error('forum error',error?.message);

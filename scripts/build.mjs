@@ -96,6 +96,9 @@ export async function build() {
   await cp(resolve(root,'forum/index.html'),resolve(dist,'forum/index.html'));
   await cp(resolve(root,'forum/forum.css'),resolve(dist,'forum/forum.css'));
   await cp(resolve(root,'forum/forum.js'),resolve(dist,'forum/forum.js'));
+  await mkdir(resolve(dist,'forum/admin'),{recursive:true});
+  await cp(resolve(root,'forum/admin/index.html'),resolve(dist,'forum/admin/index.html'));
+  await cp(resolve(root,'forum/admin/admin.js'),resolve(dist,'forum/admin/admin.js'));
   await cp(resolve(root,'CHARTER_JA.md'),resolve(dist,'forum/charter-ja.md'));
   await writeFile(resolve(dist,'assets/site-qr.png'),await createQr());
   for(const name of ['style.css','site.js','_headers','404.html']) await cp(resolve(root,'site',name),resolve(dist,name));

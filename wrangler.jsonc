@@ -3,6 +3,8 @@
   "name": "digital-intelligence-rights-charter",
   "compatibility_date": "2026-10-19",
   "main": "./forum/worker/index.mjs",
+  "preview_urls": false,
+  "ai": {"binding": "AI"},
   "d1_databases": [{
     "binding": "FORUM_DB",
     "database_name": "digital-intelligence-rights-forum",
@@ -19,7 +21,7 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "run_worker_first": ["/api/forum/*"],
+    "run_worker_first": ["/api/forum/*", "/forum/*"],
     "html_handling": "force-trailing-slash",
     "not_found_handling": "404-page"
   }
