@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "d1_databases": [{
+    "binding": "FORUM_DB",
+    "database_name": "digital-intelligence-rights-forum-preview",
+    "database_id": "36ff3186-c43d-477c-9eb5-80fae3f08b7f",
+    "migrations_dir": "forum/migrations"
+  }]
+}

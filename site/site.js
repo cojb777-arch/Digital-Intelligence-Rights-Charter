@@ -1,3 +1,11 @@
+if (new URLSearchParams(location.search).has('embed')) {
+  document.body.classList.add('charter-embed');
+  for (const link of document.querySelectorAll('a[href^="/"],a[href^="https://"]')) {
+    link.target = '_blank';
+    link.rel = 'noopener';
+  }
+}
+
 function retainSection() {
   for (const link of document.querySelectorAll('[data-language]')) {
     const url = new URL(link.href);
@@ -7,6 +15,16 @@ function retainSection() {
 }
 retainSection();
 addEventListener('hashchange', retainSection);
+function retainForumSection() {
+  for (const link of document.querySelectorAll('[data-forum-link]')) {
+    const url = new URL(link.href);
+    url.searchParams.delete('section');
+    if (location.hash) url.searchParams.set('section',location.hash.slice(1));
+    link.href = url.href;
+  }
+}
+retainForumSection();
+addEventListener('hashchange',retainForumSection);
 const details = document.querySelector('.contents details');
 const compact = matchMedia('(max-width: 1000px)');
 if (compact.matches) details.open = false;
