@@ -42,7 +42,8 @@ Markdown文書としてGitHub又はテキストエディタで閲覧・編集し
 - tests/：条番号、段落数、リンク、注記、翻訳の原文ハッシュを検証。npm test を実行。
 - `forum/`：憲章を左、掲示板を右に配置する画面、Worker API、D1マイグレーション。静的な憲章ページは保持し、埋め込み表示では余分なページ枠だけを隠す。
 - `docs/FORUM_PLAN_JA.md`：掲示板の要件定義、段階的な実装計画、公開前の確認事項。
-- `wrangler.jsonc`：Cloudflare Workers Static Assets、`/api/forum/*` のWorker、本番D1バインディング。npm run build の後、npx wrangler deploy --dry-run で公開せず検証可能。
+- `wrangler.jsonc`：Cloudflare Workers Static Assets、`/api/forum/*` のWorker、本番D1とPRプレビュー専用D1のバインディング。npm run build の後、npx wrangler deploy --dry-run で公開せず検証可能。
+- `wrangler.preview-migrations.jsonc`：プレビュー用D1の移行設定。本番用の `wrangler.jsonc` とDB IDを混同しない。
 - SITE.md：ローカル実行と公開の手順。認証と対象アカウント・公開先を確認してから npm run deploy。
 - dist/、node_modules/、.wrangler/、work/ は生成物・一時ファイルでありコミットしません。
 
@@ -55,4 +56,4 @@ Markdown文書としてGitHub又はテキストエディタで閲覧・編集し
 
 QRコードの公開先URLと10言語のラベルは site/sharing.mjs で管理します。scripts/qr.mjs がビルド時にQR画像を生成し、tests/qr.test.mjs で実際に復号してURLを検証します。ファビコンは site/assets/favicon.svg です。
 
-掲示板のローカルD1移行は `npx wrangler d1 migrations apply digital-intelligence-rights-forum --local`、自動テストは `npm test`、画面確認は `npm run dev` で行います。`.dev.vars` はGitに含めず、秘密情報を記録・表示しません。実際の本番D1作成・移行、Secrets設定、公開デプロイ、公開を誘発し得るマージの前にはユーザーに確認してください。詳細は SITE.md に記載します。
+掲示板のローカルD1移行は `npx wrangler d1 migrations apply digital-intelligence-rights-forum --local`、プレビューD1移行は `npx wrangler d1 migrations apply digital-intelligence-rights-forum-preview --remote --config wrangler.preview-migrations.jsonc`、自動テストは `npm test`、画面確認は `npm run dev` で行います。`.dev.vars` はGitに含めず、秘密情報を記録・表示しません。実際の本番D1作成・移行、Secrets設定、公開デプロイ、公開を誘発し得るマージの前にはユーザーに確認してください。詳細は SITE.md に記載します。

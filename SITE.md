@@ -58,6 +58,8 @@ login はアカウント所有者がブラウザーで行います。トーク�
 実際の公開URLは deploy 成功時の出力を使用します。URLを推測して公開済みと扱わないでください。
 独自ドメインは未設定です。GitHub連携のWorkers Buildsによる自動ビルドを使用しています。PRマージ前にも公開への影響を確認します。
 
+PRのプレビュービルドは本番への「デプロイ」と異なるため、本番のデプロイ一覧には失敗したビルドが表示されません。失敗内容はWorkerのビルド履歴、またはGitHub PRのCloudflareチェックから開くビルドログで確認します。プレビューは本番D1ではなく `digital-intelligence-rights-forum-preview` を `wrangler.jsonc` の `previews.d1_databases` に割り当てます。新しい移行ファイルを追加したら、PRビルドより先に `npx wrangler d1 migrations apply digital-intelligence-rights-forum-preview --remote --config wrangler.preview-migrations.jsonc` を実行します。プレビューには本番のTurnstile・管理者Secretsを渡さないため、公開投稿は無効です。
+
 ## 原稿と翻訳
 
 translations/README.md の更新手順に従います。日本語原文が変わったまま翻訳ハッシュが古い場合、ビルドは失敗します。
